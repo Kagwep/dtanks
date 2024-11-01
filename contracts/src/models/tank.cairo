@@ -1,6 +1,6 @@
 use starknet::ContractAddress;
-use contracts::models::position::{Position,Vec3,GridPosition};
-use contracts::models::units::unit_states::AbilityState;
+use contracts::models::position::{Position,Vec2,GridPosition};
+
 
 #[derive(Copy, Drop, Serde, Introspect)]
 #[dojo::model]
@@ -34,7 +34,7 @@ impl DtankImpl of DtankTrait {
             health: 100,
             position: GridPosition { row, col },
             is_active: true,
-            target_id: 0;
+            target_id: 0,
             commitment: commitment,
             pending_damage: 0,
         }
@@ -73,7 +73,7 @@ impl DtankImpl of DtankTrait {
 
     #[inline(always)]
     fn move(ref self: Dtank,row: u32,col:u32){
-        self.occupied = false;
+        self.position = GridPosition { row, col };
     }
 
     #[inline(always)]
@@ -82,7 +82,7 @@ impl DtankImpl of DtankTrait {
     }
 
     #[inline(always)]
-    fn get_row_col_info(self: Dtank) -> (row,col){
+    fn get_row_col_info(self: Dtank) -> (u32,u32){
         (self.position.row,self.position.col)
     }
 

@@ -1,4 +1,7 @@
-#[derive(Drop, Starknet)]
+use contracts::models::position::{GridPosition};
+
+
+#[derive(Copy, Drop, Serde, Introspect,PartialEq)]
 struct PlantsPatch {
     position: GridPosition,
     plant_density: u32,

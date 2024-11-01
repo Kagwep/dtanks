@@ -1,8 +1,9 @@
 
-use contracts::models::tree::{Tree};
+use contracts::models::tree::{Tree, CellSize};
 use contracts::models::plants::{PlantsPatch};
+use contracts::models::position::{GridPosition};
 
-const SIZE_OFFSET = 100;
+const SIZE_OFFSET: u32 = 100;
 
 #[derive(Copy,Drop,Serde)]
 #[dojo::model]
@@ -50,7 +51,7 @@ impl TileImpl of TileTrait {
                 }
             },
             size:150, // 1.5 Offset
-            accupied: false,
+            occupied: false,
     }
     }
 
@@ -89,7 +90,7 @@ impl TileImpl of TileTrait {
 
       #[inline(always)]
       fn tile_has_tree(self: Tile) -> bool {
-        self.tree.capacity ! = 0
+        self.tree.capacity != 0
       }
     
     

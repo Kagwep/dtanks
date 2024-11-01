@@ -1,102 +1,419 @@
-use dojo_starter::models::Direction;
-use dojo_starter::models::Position;
+use starknet::{ContractAddress, get_caller_address, get_block_timestamp};
+use contracts::models::game::{Game, GameTrait, GameAssert};
+use contracts::models::player::{Player,PlayerTrait};
 
 // define the interface
-#[starknet::interface]
-trait IActions<T> {
-    fn spawn(ref self: T);
-    fn move(ref self: T, direction: Direction);
+#[dojo::interface]
+trait IActions {
+    fn deploy(ref world: IWorldDispatcher,game_id: u32, row: u32, col: u32,is_dummy: bool, salt: felt252);
+    fn move(ref world: IWorldDispatcher,game_id: u32,unit_id: u32, row: u32, col: u32);
+    fn aim(ref world: IWorldDispatcher,game_id: u32,unit_id: u32,target_id: u32);
+    fn fire(ref world: IWorldDispatcher,game_id: u32,unit_id: u32,is_dummy: bool, salt: felt252);
+    fn reveal(ref world: IWorldDispatcher,game_id: u32,unit_id: u32,is_dummy: bool, salt: felt252);
 }
+
+
+#[dojo::interface]
+trait IActionsInternal {
+
+    fn _handle_player_checks(
+        ref world: IWorldDispatcher,
+        game: Game,
+        caller: ContractAddress
+    ) -> Player;
+
+    fn _get_damage(
+        ref world: IWorldDispatcher,
+        game_id: u32,
+        source_row: u32,
+        source_col: u32,
+        target_row: u32,
+        target_col: u32,
+    ) -> u32;
+
+
+    fn _validate_path(
+        ref world: IWorldDispatcher,
+        game_id: u32,
+        source_row: u32,
+        source_col: u32,
+        target_row: u32,
+        target_col: u32,
+    ) -> bool;
+
+}
+
 
 // dojo decorator
 #[dojo::contract]
-pub mod actions {
-    use super::{IActions, next_position};
-    use starknet::{ContractAddress, get_caller_address};
-    use dojo_starter::models::{Position, Vec2, Moves, Direction, DirectionsAvailable};
+mod actions {
+    use super::{IActions};
+    use starknet::{ContractAddress, get_caller_address, get_block_timestamp};
+    use contracts::models::tank::{Dtank, DtankTrait};
+    use contracts::models::tile::{Tile, TileTrait};
+    use contracts::utils::helper::{HelperTrait};
+    use contracts::models::player::{Player,PlayerTrait,AssertTrait};
+    use contracts::models::game::{Game, GameTrait, GameAssert};
+    use contracts::constants::{ROW,COL,TREE_DAMAGE,PLANT_DAMAGE,INITIAL_HEALTH,MAX_MOVE_DISTANCE,POINTS_FOR_REAL_TANK_KILL,POINTS_FOR_ATTACKING_DUMMY,WIN_THRESHOLD,MIDDLE_ROW};
 
-    use dojo::model::{ModelStorage, ModelValueStorage};
-    use dojo::event::EventStorage;
-
-    #[derive(Copy, Drop, Serde)]
-    #[dojo::event]
-    pub struct Moved {
-        #[key]
-        pub player: ContractAddress,
-        pub direction: Direction,
-    }
 
     #[abi(embed_v0)]
     impl ActionsImpl of IActions<ContractState> {
-        fn spawn(ref self: ContractState) {
-            // Get the default world. 
-            let mut world = self.world(@"dojo_starter");
 
-            // Get the address of the current caller, possibly the player's address.
-            let player = get_caller_address();
-            // Retrieve the player's current position from the world.
-            let mut position: Position = world.read_model(player);
+        fn deploy(ref world: IWorldDispatcher,game_id: u32, row: u32, col: u32,is_dummy: bool, salt: felt252){
 
-            // Update the world state with the new data.
 
-            // 1. Move the player's position 10 units in both the x and y direction.
-            let new_position = Position {
-                player, vec: Vec2 { x: position.vec.x + 10, y: position.vec.y + 10 }
-            };
+            let caller = get_caller_address();
 
-            // Write the new position to the world.
-            world.write_model(@new_position);
+            let mut game = get!(world,game_id,(Game));
+
+            if game.dtanks_host == caller {
+                assert(row < MIDDLE_ROW, 'Cannot Deploy');
+            }else {
+                assert(row >= MIDDLE_ROW, 'CAnnot Deploy');
+            }
+
+            let mut tile = get!(world,(game_id,row,col),Tile);
+
+            assert(tile.can_deploy(),'TILE: Cannot deploy');
+
+            // player checks
+            let mut player =self._handle_player_checks(
+                game,
+                caller
+            );
+
+            assert(player.supply > 0, 'Player: No supply');
+
+            if is_dummy {
+                assert(player.dummy_tank_count > 0, 'Player: No Dummies');
+            }else{
+                assert(player.real_tank_count > 0 ,'Player: No  Tanks')
+            }
             
-            // 2. Set the player's remaining moves to 100.
-            let moves = Moves { 
-                player, remaining: 100, last_direction: Direction::None(()), can_move: true
+
+            let commitment = HelperTrait::generate_poseidon_commitment(is_dummy, salt);
+
+            let unit_id = game.add_unit();
+            
+            let dtank = DtankTrait::new(game_id, unit_id, player.index, row,col,commitment);
+
+            player.dtank_supply();
+
+            if is_dummy {
+                player.dtank_supply_dummy();
+            }else{
+                player.dtank_supply_real();
+            }
+
+            let remaining_turns = player.use_turn();
+
+            if remaining_turns == 0 {
+
+                game.advance_turn();
+                player.reset_moves();
+
+                let time = get_block_timestamp();
+
+                let mut new_player = HelperTrait::current_player(world,game);
+                new_player.set_turn_start_time(time);
+                set!(world,(new_player));
+
+            }
+
+            tile.deploy();
+
+            set!(world,(game,dtank,tile));
+
+            
+        }
+
+        fn move(ref world: IWorldDispatcher,game_id: u32,unit_id: u32, row: u32, col: u32){
+
+
+            let caller = get_caller_address();
+
+            let mut game = get!(world,game_id,(Game));
+            
+            // player checks
+            let mut player = self._handle_player_checks(
+                game,
+                caller
+            );
+
+            let mut tile = get!(world,(game_id,row,col),Tile);
+
+            assert(tile.can_deploy(),'TILE: Cannot deploy');
+
+            let mut dtank = get!(world,(game.game_id,unit_id,player.index),Dtank);
+
+            assert(dtank.is_active(), 'Dtank: Not active');
+
+            dtank.move(row,col);
+
+            tile.move();
+
+            set!(world,(tile,dtank));
+
+
+        }
+
+        fn aim(ref world: IWorldDispatcher,game_id: u32,unit_id: u32,target_id: u32){
+
+            let caller = get_caller_address();
+
+            let mut game = get!(world,game_id,(Game));
+
+            // player checks
+            let player = self._handle_player_checks(
+                game,
+                caller
+            );
+
+            let mut dtank = get!(world,(game.game_id,unit_id,player.index),Dtank);
+
+            assert(dtank.is_active(), 'Dtank: Not active');
+
+            dtank.aim(target_id);
+            set!(world,(dtank));
+
+        }
+
+        fn fire(ref world: IWorldDispatcher,game_id: u32,unit_id: u32,is_dummy: bool, salt: felt252){
+
+            assert(!is_dummy, 'Dtank: Dummy');
+
+            let caller = get_caller_address();
+
+            let mut game = get!(world,game_id,(Game));
+
+            // player checks
+           let mut player = self._handle_player_checks(
+                game,
+                caller
+            );
+
+            let mut dtank = get!(world,(game.game_id),Dtank);
+
+            assert(dtank.is_active(), 'Dtank: Not active');
+
+            assert(dtank.tank_has_target(), 'Dtank: No target');
+
+            let mut target_dtank = get!(world,(game.game_id),Dtank);
+
+            let (target_row,target_col) = target_dtank.get_row_col_info();
+
+            //let tile = get!(world,(game.game_id,row,col),Tile);
+
+            assert(self._validate_path(
+                game.game_id,
+                dtank.position.row,
+                dtank.position.col,
+                target_row,
+                target_col,
+            ),'Path: inavlid');
+
+            let damage = self._get_damage(
+                game.game_id,
+                dtank.position.row,
+                dtank.position.col,
+                target_row,
+                target_col,
+            );
+
+            dtank.fire_gun();
+
+            target_dtank.take_pending_damage(damage);
+
+            set!(world,(target_dtank,dtank));
+
+        }
+
+        fn reveal(ref world: IWorldDispatcher,game_id: u32,unit_id: u32,is_dummy: bool, salt: felt252){
+
+            let caller = get_caller_address();
+
+            let mut game = get!(world,game_id,(Game));
+
+            // player checks
+            let mut player = self._handle_player_checks(
+                game,
+                caller
+            );
+
+            let mut dtank = get!(world,(game.game_id,unit_id,player.index),Dtank);
+
+            assert(dtank.pending_damage > 0, 'Dtank:  No pending damage');
+
+            // Verify commitment
+            let calculated_commitment = HelperTrait::generate_poseidon_commitment(is_dummy, salt);
+            assert(calculated_commitment == dtank.commitment, 'invalid reveal');
+
+            // Calculate final damage
+            if is_dummy {
+
+                player.player_score += POINTS_FOR_ATTACKING_DUMMY;
+
+                if player.player_score >= WIN_THRESHOLD {
+
+                    game.over = true;
+                    game.winner = player.address;
+
+                    set!(world,(game));
+                }
+
+                set!(world,(dtank,player));
+
+            }else{
+
+                let attacker_id = game.next_player();
+
+                let mut attacker = get!(world,(game.game_id,attacker_id),Player);
+
+                attacker.player_score += POINTS_FOR_REAL_TANK_KILL;
+
+                dtank.take_damage(dtank.pending_damage);
+
+                if attacker.player_score >= WIN_THRESHOLD {
+
+                    game.over = true;
+                    game.winner = attacker.address;
+
+                    set!(world,(game));
+                
+                }
+
+                set!(world,(dtank,player,attacker));
+
+            }
+
+
+        }
+
+    }
+
+    impl ActionsInternalImpl of super::IActionsInternal<ContractState> {
+        // Function to handle unit type-specific operations
+        fn _handle_player_checks(
+            ref world: IWorldDispatcher,
+            game: Game,
+            caller: ContractAddress
+        ) -> Player{
+
+            assert(game.over == false, 'Game: Game over');
+            // get the player
+            let mut player = match HelperTrait::find_player(world,game, caller) {
+                Option::Some(player) => player,
+                Option::None => panic(array!['PLayer does not exist']),
             };
 
-            // Write the new moves to the world.
-            world.write_model(@moves);
+            player.assert_exists();
+
+            player.assert_has_turns();
+
+            let time = get_block_timestamp();
+
+            assert(!player.is_turn_timed_out(time), 'Turn Timeout');
+
+            player
+
         }
 
-        // Implementation of the move function for the ContractState struct.
-        fn move(ref self: ContractState, direction: Direction) {
-            // Get the address of the current caller, possibly the player's address.
 
-            let mut world = self.world(@"dojo_starter");
+    fn _get_damage(
+        ref world: IWorldDispatcher,
+        game_id: u32,
+        source_row: u32,
+        source_col: u32,
+        target_row: u32,
+        target_col: u32,
+    ) -> u32 {
+        // Track two types of health/damage
+        let mut nature_resistance = INITIAL_HEALTH;
+        let mut structure_resistance = INITIAL_HEALTH;
+        
+        // Start from source (excluding it)
+        let mut current_row = source_row;
+        let mut current_col = source_col;
+        
+        loop {
+            // Move towards target
+            if current_row < target_row {
+                current_row += 1;
+            } else if current_row > target_row {
+                current_row = current_row - 1;
+            }
 
-            let player = get_caller_address();
+            if current_col < target_col {
+                current_col += 1;
+            } else if current_col > target_col {
+                current_col = current_col - 1;
+            }
 
-            // Retrieve the player's current position and moves data from the world.
-            let mut position: Position = world.read_model(player);
-            let mut moves: Moves = world.read_model(player);
+            // Check if we've reached the target
+            if current_row == target_row && current_col == target_col {
+                break;
+            }
 
-            // Deduct one from the player's remaining moves.
-            moves.remaining -= 1;
+            let tile = get!(world, (game_id, current_row, current_col), Tile);
+            
+            // Apply damage from plants (nature resistance)
+            if tile.tile_has_plant_path() && nature_resistance >= PLANT_DAMAGE {
+                nature_resistance -= PLANT_DAMAGE;
+            }
+            
+            // Apply damage from trees (structure resistance)
+            if tile.tile_has_tree() && structure_resistance >= TREE_DAMAGE {
+                structure_resistance -= TREE_DAMAGE;
+            }
+        };
 
-            // Update the last direction the player moved in.
-            moves.last_direction = direction;
+        // Return average of both resistances
+        (nature_resistance + structure_resistance) / 2
+    }
 
-            // Calculate the player's next position based on the provided direction.
-            let next = next_position(position, direction);
+        fn _validate_path(
+            ref world: IWorldDispatcher,
+            game_id: u32,
+            source_row: u32,
+            source_col: u32,
+            target_row: u32,
+            target_col: u32,
+        )-> bool{
 
-            // Write the new position to the world.
-            world.write_model(@next);
+             let row_diff = if target_row >= source_row {
+                target_row - source_row
+             }else {
+                source_row - target_row
+             };
 
-            // Write the new moves to the world.
-            world.write_model(@moves);
-          
-            // Emit an event to the world to notify about the player's move.
-            world.emit_event(@Moved { player, direction });
+             let col_diff = if target_col >= source_col{
+                target_col - source_col
+             }else{
+                source_col - target_col
+             };
+
+             //check if movement is zero 
+
+             if row_diff == 0 && col_diff == 0 {
+                return false;
+             }
+
+             if row_diff > MAX_MOVE_DISTANCE || col_diff > MAX_MOVE_DISTANCE {
+                return false;
+             }
+
+            // Check if movement is valid (horizontal, vertical, or diagonal)
+            let is_horizontal = row_diff == 0 && col_diff > 0;
+            let is_vertical = col_diff == 0 && row_diff > 0;
+            let is_diagonal = row_diff == col_diff;
+
+
+            // Return true only if move is valid and target is free
+            (is_horizontal || is_vertical || is_diagonal) 
+
         }
+
     }
 }
 
-// Define function like this:
-fn next_position(mut position: Position, direction: Direction) -> Position {
-    match direction {
-        Direction::None => { return position; },
-        Direction::Left => { position.vec.x -= 1; },
-        Direction::Right => { position.vec.x += 1; },
-        Direction::Up => { position.vec.y -= 1; },
-        Direction::Down => { position.vec.y += 1; },
-    };
-    position
-}

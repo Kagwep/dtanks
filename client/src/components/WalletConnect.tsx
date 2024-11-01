@@ -1,5 +1,5 @@
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import { ControllerConnector } from "@cartridge/connector/controller";
+import { ControllerConnector } from "@cartridge/connector";
 import { useEffect, useState } from "react";
 
 export function WalletConnect() {
