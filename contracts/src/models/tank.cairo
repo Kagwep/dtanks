@@ -67,8 +67,8 @@ impl DtankImpl of DtankTrait {
 
 
     #[inline(always)]
-    fn is_active(self: Dtank) -> bool {
-        self.is_active && self.pending_damage == 0
+    fn is_dtank_active(self: Dtank) -> bool {
+        self.is_active && (self.pending_damage == 0)
     }
 
     #[inline(always)]

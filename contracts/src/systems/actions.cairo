@@ -41,6 +41,12 @@ trait IActionsInternal {
         target_col: u32,
     ) -> bool;
 
+    fn _check_switch_player(
+        ref world: IWorldDispatcher,
+        player: Player,
+        game: Game
+    ) -> (Player,Game);
+
 }
 
 
@@ -70,7 +76,7 @@ mod actions {
             if game.dtanks_host == caller {
                 assert(row < MIDDLE_ROW, 'Cannot Deploy');
             }else {
-                assert(row >= MIDDLE_ROW, 'CAnnot Deploy');
+                assert(row >= MIDDLE_ROW, 'Cannot Deploy');
             }
 
             let mut tile = get!(world,(game_id,row,col),Tile);
@@ -106,24 +112,11 @@ mod actions {
                 player.dtank_supply_real();
             }
 
-            let remaining_turns = player.use_turn();
-
-            if remaining_turns == 0 {
-
-                game.advance_turn();
-                player.reset_moves();
-
-                let time = get_block_timestamp();
-
-                let mut new_player = HelperTrait::current_player(world,game);
-                new_player.set_turn_start_time(time);
-                set!(world,(new_player));
-
-            }
+            let (player,game) = self._check_switch_player(player,game);
 
             tile.deploy();
 
-            set!(world,(game,dtank,tile));
+            set!(world,(game,dtank,tile,player));
 
             
         }
@@ -147,13 +140,20 @@ mod actions {
 
             let mut dtank = get!(world,(game.game_id,unit_id,player.index),Dtank);
 
-            assert(dtank.is_active(), 'Dtank: Not active');
+
+            assert(dtank.is_dtank_active(), 'Dtank: Not active');
+
+            let mut previous_tile = get!(world,(game_id,dtank.position.row,dtank.position.col),Tile);
 
             dtank.move(row,col);
 
-            tile.move();
+            tile.deploy();
 
-            set!(world,(tile,dtank));
+            previous_tile.move();
+
+            let (player,game) = self._check_switch_player(player,game);
+
+            set!(world,(game,tile,dtank,player,previous_tile));
 
 
         }
@@ -172,10 +172,13 @@ mod actions {
 
             let mut dtank = get!(world,(game.game_id,unit_id,player.index),Dtank);
 
-            assert(dtank.is_active(), 'Dtank: Not active');
+            assert(dtank.is_dtank_active(), 'Dtank: Not active');
 
             dtank.aim(target_id);
-            set!(world,(dtank));
+
+            let (player,game) = self._check_switch_player(player,game);
+
+            set!(world,(game,dtank,player));
 
         }
 
@@ -193,13 +196,19 @@ mod actions {
                 caller
             );
 
-            let mut dtank = get!(world,(game.game_id),Dtank);
+            let mut dtank = get!(world,(game.game_id,unit_id,player.index),Dtank);
 
-            assert(dtank.is_active(), 'Dtank: Not active');
+            assert(dtank.is_dtank_active(), 'Dtank: Not active');
 
             assert(dtank.tank_has_target(), 'Dtank: No target');
 
-            let mut target_dtank = get!(world,(game.game_id),Dtank);
+            let opponent_id = if player.index == 0{
+                1_u32
+            }else{
+                0_u32
+            };
+
+            let mut target_dtank = get!(world,(game.game_id,dtank.target_id,opponent_id),Dtank);
 
             let (target_row,target_col) = target_dtank.get_row_col_info();
 
@@ -225,7 +234,13 @@ mod actions {
 
             target_dtank.take_pending_damage(damage);
 
-            set!(world,(target_dtank,dtank));
+            let (player,game) = self._check_switch_player(player,game);
+
+            let mut op_player = get!(world,(game_id,opponent_id),Player);
+
+            op_player.flip_reveal();
+
+            set!(world,(game,target_dtank,dtank,player,op_player));
 
         }
 
@@ -236,10 +251,20 @@ mod actions {
             let mut game = get!(world,game_id,(Game));
 
             // player checks
-            let mut player = self._handle_player_checks(
-                game,
-                caller
-            );
+            assert(game.over == false, 'Game: Game over');
+            // get the player
+            let mut player = match HelperTrait::find_player(world,game, caller) {
+                Option::Some(player) => player,
+                Option::None => panic(array!['PLayer does not exist']),
+            };
+
+            player.assert_exists();
+
+            player.assert_has_turns();
+
+            let time = get_block_timestamp();
+
+            assert(!player.is_turn_timed_out(time), 'Turn Timeout');
 
             let mut dtank = get!(world,(game.game_id,unit_id,player.index),Dtank);
 
@@ -253,6 +278,8 @@ mod actions {
             if is_dummy {
 
                 player.player_score += POINTS_FOR_ATTACKING_DUMMY;
+
+                player.flip_reveal();
 
                 if player.player_score >= WIN_THRESHOLD {
 
@@ -282,6 +309,8 @@ mod actions {
                     set!(world,(game));
                 
                 }
+
+                player.flip_reveal();
 
                 set!(world,(dtank,player,attacker));
 
@@ -314,6 +343,8 @@ mod actions {
             let time = get_block_timestamp();
 
             assert(!player.is_turn_timed_out(time), 'Turn Timeout');
+
+            assert(!player.reveal, 'Player: You have a reveal');
 
             player
 
@@ -414,6 +445,30 @@ mod actions {
 
         }
 
+        fn _check_switch_player(
+            ref world: IWorldDispatcher,
+            mut player: Player,
+            mut game:Game
+        ) -> (Player,Game) {
+            let remaining_turns = player.use_turn();
+
+            if remaining_turns == 0 {
+
+                game.advance_turn();
+                player.reset_moves();
+
+                let time = get_block_timestamp();
+
+                let mut new_player = HelperTrait::current_player(world,game);
+                new_player.set_turn_start_time(time);
+                set!(world,(new_player));
+
+                return (player,game);
+
+            }
+
+            (player,game)
+        }
     }
 }
 

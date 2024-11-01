@@ -32,6 +32,7 @@ struct Player {
     player_score: u32,
     turns_remaining: u8,
     turn_start_time: u64,
+    reveal:bool,
 }
 
 
@@ -50,6 +51,7 @@ impl PlayerImpl of PlayerTrait {
         player_score: 0,
         turns_remaining: INITIAL_MOVES,
         turn_start_time: 0,
+        reveal:false,
     }
     }
 
@@ -127,6 +129,11 @@ impl PlayerImpl of PlayerTrait {
         self.dummy_tank_count
     }
     
+
+    #[inline(always)]
+    fn flip_reveal(ref self: Player){
+        self.reveal = !self.reveal;
+    }
     
     
 }
@@ -165,6 +172,7 @@ impl ZeroablePlayer of Zeroable<Player> {
             player_score:  0,
             turns_remaining: 0,
             turn_start_time: 0,
+            reveal:false,
         }
     }
 

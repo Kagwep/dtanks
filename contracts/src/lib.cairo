@@ -1,9 +1,28 @@
 mod systems {
+    mod arena;
     mod actions;
 }
 
-mod models;
 
+mod constants;
+
+mod utils;
+
+
+mod models{
+    mod game;
+    mod player;
+    mod plants;
+    mod position;
+    mod tank;
+    mod tile;
+    mod tree;
+}
+
+#[cfg(test)]
 mod tests {
-    mod test_world;
+    mod setup;
+    mod arena;
+    mod actions;
+
 }
