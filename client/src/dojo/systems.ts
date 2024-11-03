@@ -31,31 +31,7 @@ export async function setupWorld(provider: DojoProvider) {
     console.log("called ........", account);
     console.log("called ........", {contractName, entrypoint: methodName, calldata: args});
     
-    const details: UniversalDetails = {
-      skipValidate: true,
-      maxFee: "0xFFFFFFFFFFFFFFFF",
-      resourceBounds: {
-        l1_gas: {
-          max_amount: "0x7fffffffffffffff",      // u64 max amount
-          max_price_per_unit: "0x1"             // u128 max price
-        },
-        l2_gas: {
-          max_amount: "0x7fffffffffffffff",      // u64 max amount
-          max_price_per_unit: "0x1"             // u128 max price
-        }
-      },
-    };
-
-
-    const ret = await provider.execute(
-      account, 
-      {
-        contractName,
-        entrypoint: methodName,
-        calldata: args
-      },
-      details
-    );
+    const ret = await provider.execute(account, {contractName, entrypoint: methodName, calldata: args});
 
     console.log(ret.transaction_hash);
 
@@ -103,6 +79,7 @@ export async function setupWorld(provider: DojoProvider) {
 
     const join = async (account: AccountInterface, gameId: number, playerName: string) => {
       try {
+       
         return await executeAndCheck(account, contractName, 'join', [ gameId, playerName]);
       } catch (error) {
         console.error('Error executing join:', error);
