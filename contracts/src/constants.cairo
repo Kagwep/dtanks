@@ -12,3 +12,4 @@ const WIN_THRESHOLD: u32 = 1500;
 
 
 const MIDDLE_ROW: u32 = 15;
+const PLACEMENTS: u32 = 84; 

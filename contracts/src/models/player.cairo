@@ -6,6 +6,7 @@ use starknet::ContractAddress;
 const INITIAL_MOVES: u8 = 12;
 const ACTION_MOVES: u8 = 3;
 const TURN_TIME_LIMIT_SECONDS: u64 = 2000;
+const PLACEMENTS: u32 = 84;
 
 mod errors {
     const PLAYER_INVALID_RANK: felt252 = 'Player: invalid rank';
@@ -33,6 +34,7 @@ struct Player {
     turns_remaining: u8,
     turn_start_time: u64,
     reveal:bool,
+    placements:u32,
 }
 
 
@@ -52,6 +54,7 @@ impl PlayerImpl of PlayerTrait {
         turns_remaining: INITIAL_MOVES,
         turn_start_time: 0,
         reveal:false,
+        placements:PLACEMENTS,
     }
     }
 
@@ -67,6 +70,11 @@ impl PlayerImpl of PlayerTrait {
 
         self.turns_remaining
 
+    }
+
+    fn consume_placements(ref self: Player){
+        assert(self.placements >= 0,'No Placements remaining.');
+        self.placements -=1;
     }
 
     #[inline(always)]
@@ -173,6 +181,7 @@ impl ZeroablePlayer of Zeroable<Player> {
             turns_remaining: 0,
             turn_start_time: 0,
             reveal:false,
+            placements:0,
         }
     }
 

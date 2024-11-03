@@ -63,12 +63,11 @@ impl TileImpl of TileTrait {
 
     #[inline(always)]
     fn add_plant_to_grid(ref self:Tile, plant_density: u32){
-        self.plants.plant_density = plant_density;
+        self.plants.plant_density=plant_density;
     }
-
     #[inline(always)]
     fn add_plant_tree_to_grid(ref self: Tile, capacity: u32){
-     self.tree.capacity = capacity;
+        self.tree.capacity=capacity;
     }
 
 

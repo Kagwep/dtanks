@@ -1,6 +1,7 @@
 use starknet::{ContractAddress, get_caller_address, get_block_timestamp};
 use contracts::models::game::{Game, GameTrait, GameAssert};
 use contracts::models::player::{Player,PlayerTrait};
+use contracts::models::tile::{Tile,TileTrait};
 
 // define the interface
 #[dojo::interface]
@@ -10,6 +11,8 @@ trait IActions {
     fn aim(ref world: IWorldDispatcher,game_id: u32,unit_id: u32,target_id: u32);
     fn fire(ref world: IWorldDispatcher,game_id: u32,unit_id: u32,is_dummy: bool, salt: felt252);
     fn reveal(ref world: IWorldDispatcher,game_id: u32,unit_id: u32,is_dummy: bool, salt: felt252);
+    fn shrub(ref world: IWorldDispatcher,game_id: u32, row: u32, col: u32);
+    fn tree(ref world: IWorldDispatcher,game_id: u32, row: u32, col: u32);
 }
 
 
@@ -47,6 +50,13 @@ trait IActionsInternal {
         game: Game
     ) -> (Player,Game);
 
+    fn _get_tile(
+        ref world: IWorldDispatcher,
+        game_id: u32,
+        row: u32,
+        col: u32
+    ) -> Tile;
+
 }
 
 
@@ -79,7 +89,7 @@ mod actions {
                 assert(row >= MIDDLE_ROW, 'Cannot Deploy');
             }
 
-            let mut tile = get!(world,(game_id,row,col),Tile);
+            let mut tile =  self._get_tile(game_id,row,col);
 
             assert(tile.can_deploy(),'TILE: Cannot deploy');
 
@@ -112,8 +122,11 @@ mod actions {
                 player.dtank_supply_real();
             }
 
-            let (player,game) = self._check_switch_player(player,game);
+            player.use_turn();
 
+            let (mut player,game) = self._check_switch_player(player,game);
+
+    
             tile.deploy();
 
             set!(world,(game,dtank,tile,player));
@@ -134,7 +147,7 @@ mod actions {
                 caller
             );
 
-            let mut tile = get!(world,(game_id,row,col),Tile);
+            let mut tile = self._get_tile(game_id,row,col);
 
             assert(tile.can_deploy(),'TILE: Cannot deploy');
 
@@ -151,6 +164,8 @@ mod actions {
 
             previous_tile.move();
 
+            player.use_turn();
+
             let (player,game) = self._check_switch_player(player,game);
 
             set!(world,(game,tile,dtank,player,previous_tile));
@@ -165,7 +180,7 @@ mod actions {
             let mut game = get!(world,game_id,(Game));
 
             // player checks
-            let player = self._handle_player_checks(
+            let mut player = self._handle_player_checks(
                 game,
                 caller
             );
@@ -175,6 +190,8 @@ mod actions {
             assert(dtank.is_dtank_active(), 'Dtank: Not active');
 
             dtank.aim(target_id);
+
+            player.use_turn();
 
             let (player,game) = self._check_switch_player(player,game);
 
@@ -233,6 +250,8 @@ mod actions {
             dtank.fire_gun();
 
             target_dtank.take_pending_damage(damage);
+
+            player.use_turn();
 
             let (player,game) = self._check_switch_player(player,game);
 
@@ -319,6 +338,60 @@ mod actions {
 
         }
 
+        fn shrub(ref world: IWorldDispatcher,game_id: u32, row: u32, col: u32){
+
+            let caller = get_caller_address();
+
+            let mut game = get!(world,game_id,(Game));
+
+            // player checks
+           let mut player = self._handle_player_checks(
+                game,
+                caller
+            );
+
+            assert(player.placements > 0, 'Tile, Placements Depleted');
+
+            let mut tile =  self._get_tile(game_id,row,col);
+            tile.add_plant_to_grid(200);
+
+            player.use_turn();
+
+            player.consume_placements();
+
+            let (mut player,game) = self._check_switch_player(player,game);
+
+            set!(world, (tile,game,player));
+        }
+        fn tree(ref world: IWorldDispatcher,game_id: u32, row: u32, col: u32){
+
+            let caller = get_caller_address();
+
+            let mut game = get!(world,game_id,(Game));
+
+            // player checks
+           let mut player = self._handle_player_checks(
+                game,
+                caller
+            );
+
+            assert(player.placements > 0, 'Tile, Placements Depleted');
+
+            let mut tile = self._get_tile(game_id,row,col);
+            tile.add_plant_tree_to_grid(2000); // TODO: Make this configurable
+         
+
+            player.use_turn();
+
+            player.consume_placements();
+
+            let (mut player,game) = self._check_switch_player(player,game);
+
+            
+
+            set!(world, (tile,game,player));
+        }
+
     }
 
     impl ActionsInternalImpl of super::IActionsInternal<ContractState> {
@@ -335,6 +408,8 @@ mod actions {
                 Option::Some(player) => player,
                 Option::None => panic(array!['PLayer does not exist']),
             };
+
+            assert(game.player() == player.index, 'Game: Not Your Turn');
 
             player.assert_exists();
 
@@ -386,7 +461,7 @@ mod actions {
                 break;
             }
 
-            let tile = get!(world, (game_id, current_row, current_col), Tile);
+            let tile = self._get_tile(game_id,current_row,current_col);
             
             // Apply damage from plants (nature resistance)
             if tile.tile_has_plant_path() && nature_resistance >= PLANT_DAMAGE {
@@ -450,7 +525,8 @@ mod actions {
             mut player: Player,
             mut game:Game
         ) -> (Player,Game) {
-            let remaining_turns = player.use_turn();
+            
+            let remaining_turns = player.turns_remaining;
 
             if remaining_turns == 0 {
 
@@ -467,7 +543,25 @@ mod actions {
 
             }
 
+            set!(world,(player));
+
             (player,game)
+        }
+
+
+        fn _get_tile(
+            ref world: IWorldDispatcher,
+            game_id: u32,
+            row: u32,
+            col: u32
+        ) -> Tile{
+            let mut tile = get!(world,(game_id,row,col),Tile);
+
+            if tile.size != 0 {
+                return tile;
+            }else{
+                return TileTrait::new(game_id, row, col, 0);
+            }
         }
     }
 }

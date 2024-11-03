@@ -162,13 +162,6 @@ fn test_start() {
 
     assert(player.turn_start_time != 0, 'Player time not initialized');
 
-    // self._handle_tile_plant_add( game.game_id, 1, 1, 7, 7, 200, 'bottom');
-    // self._handle_tile_plant_add( game.game_id, 1, 11, 7, 17, 200, 'bottom');
-    // self._handle_tile_plant_add( game.game_id, 1, 21, 7, 27, 200, 'bottom');
-
-    let mut tile =  get!(world,(game_id,1,4),Tile);
-
-    assert(tile.plants.plant_density== 200, 'Tile: Maybe Tree?')
 
 
 }

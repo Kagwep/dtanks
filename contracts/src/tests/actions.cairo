@@ -56,6 +56,8 @@ fn test_deploy_switch_player() {
 
     let player = get!(world,(game_id,0),Player);
 
+    assert(player.turns_remaining == 3, 'PLayer: Turns not consumed');
+
     assert(player.supply == 0, 'Dtank, Did not deploy');
 
     assert(player.dummy_tank_count == 0, 'Dtank, No dummy');
@@ -114,12 +116,12 @@ fn test_deploy_switch_player_move() {
     systems.actions.deploy(game_id, 2, 13,false,'notone');
     systems.actions.deploy(game_id, 2, 12,false,'notone');
     systems.actions.deploy(game_id, 2, 11,false,'notone');
-    systems.actions.deploy(game_id, 2, 19,false,'notone');
-    systems.actions.deploy(game_id, 2, 10,false,'notone');
+    systems.actions.shrub(game_id, 2, 19);
+    systems.actions.tree(game_id, 2, 10);
 
     let player = get!(world,(game_id,0),Player);
 
-    assert(player.supply == 0, 'Dtank, Did not deploy');
+    assert(player.supply == 2, 'Dtank, Did not deploy');
 
     assert(player.dummy_tank_count == 0, 'Dtank, No dummy');
 
@@ -137,10 +139,10 @@ fn test_deploy_switch_player_move() {
     systems.actions.deploy(game_id, 15, 14,true,'dummyone');
 
 
-    systems.actions.move(game_id,13,15,15);
+    systems.actions.move(game_id,11,15,15);
 
 
-    let dtank = get!(world,(game_id,13,1),Dtank);
+    let dtank = get!(world,(game_id,11,1),Dtank);
 
     assert(dtank.ammunition == 10, 'Dtank, doesnt exist');
 
@@ -150,6 +152,9 @@ fn test_deploy_switch_player_move() {
 
      assert(player.turns_remaining == 9, 'Player: Player unused turn');
 
+    let tile =  get!(world,(game_id,2,19),Tile);
+
+     assert(tile.plants.plant_density == 200, 'Tile: Maybe Tree?')
 
 }
 

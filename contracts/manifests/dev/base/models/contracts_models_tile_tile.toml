@@ -1,0 +1,40 @@
+kind = "DojoModel"
+class_hash = "0x336e54a5e3683853cb5c7e85525db01cdebd306ff8ad8723d72ed634803986f"
+original_class_hash = "0x336e54a5e3683853cb5c7e85525db01cdebd306ff8ad8723d72ed634803986f"
+abi = "manifests/dev/abis/base/models/contracts_models_tile_tile.json"
+name = "contracts::models::tile::tile"
+
+[[members]]
+name = "game_id"
+type = "u32"
+key = true
+
+[[members]]
+name = "row"
+type = "u32"
+key = true
+
+[[members]]
+name = "col"
+type = "u32"
+key = true
+
+[[members]]
+name = "plants"
+type = "PlantsPatch"
+key = false
+
+[[members]]
+name = "tree"
+type = "Tree"
+key = false
+
+[[members]]
+name = "size"
+type = "u32"
+key = false
+
+[[members]]
+name = "occupied"
+type = "bool"
+key = false

@@ -15,34 +15,6 @@ trait IArena {
 }
 
 
-#[dojo::interface]
-trait IArenaInternal {
-
-    fn _handle_tile_plant_add(
-        ref world: IWorldDispatcher,
-        game_id: u32,
-        start_row: u32,
-        start_col: u32,
-        end_row: u32,
-        end_col: u32, 
-        plant_density: u32, 
-        gate_position: felt252
-    );
-
-
-    fn _handle_is_gate(
-        ref world: IWorldDispatcher,
-        row: u32,
-        col: u32,
-        start_row: u32,
-        start_col: u32,
-        end_row: u32,
-        end_col: u32, 
-        gate_position: felt252
-    ) -> bool;
-
-}
-
 // System implementation
 
 #[dojo::contract]
@@ -264,69 +236,6 @@ mod arena {
 
             player.set_turn_start_time(time);
 
-            let mut i: u32 = 0;
-            while i < ROW {
-                let mut j: u32 = 0;
-                while j < COL {
-                    let tile = TileTrait::new(game_id, i, j, 0);
-                    set!(world, (tile));
-                    j += 1;
-                };
-                i += 1;
-            };
-
-            // TODO: Make this configurable
-            self._handle_tile_plant_add( game.game_id, 1, 1, 7, 7, 200, 'bottom');
-            self._handle_tile_plant_add( game.game_id, 1, 11, 7, 17, 200, 'bottom');
-            self._handle_tile_plant_add( game.game_id, 1, 21, 7, 27, 200, 'bottom');
-        
-            // Middle row
-            self._handle_tile_plant_add( game.game_id, 11, 1, 19, 9, 250, 'right');
-            self._handle_tile_plant_add( game.game_id, 11, 19, 19, 27, 250, 'left');
-        
-            // Bottom row
-            self._handle_tile_plant_add( game.game_id, 23, 1, 29, 7, 200, 'top');
-            self._handle_tile_plant_add( game.game_id, 23, 11, 29, 17, 200, 'top');
-            self._handle_tile_plant_add( game.game_id, 23, 21, 29, 27, 200, 'top');
-
-            //^
-
-                    // Add additional trees in open areas
-            let mut i: u32 = 0;
-            while i < ROW {
-                       let mut j: u32 = 0;
-                       while j < COL {
-                           let mut state = PoseidonTrait::new();
-                           state.update(game_id.into());
-                           state.update(i.into());  // Changed from row to i
-                           state.update(j.into());  // Changed from col to j
-                            // Add more entropy sources
-                              // Use world nonce if available
-                            //  state.update(get_tx_hash().into()); 
-                            state.update(get_caller_address().into());
-                            state.update(get_block_timestamp().try_into().unwrap());  // Current block timestamp
-                            state.update(get_block_number().try_into().unwrap());     // Current block number
-                            let hash = state.finalize();
-
-                            
-                           
-                            // Convert felt252 to u256 first, then to u128
-                            let hash_u256: u256 = hash.into();
-                            let random_value = (hash_u256.low % 100_u128);  // Using low part of u256
-
-                       
-                            
-                           // 20% chance (values 0-19)
-                           if random_value < 20 {
-                               let mut tile = get!(world, (game.game_id, i, j), Tile);  // Changed from row,col to i,j
-                               tile.add_plant_tree_to_grid(2000); // TODO: Make this configurable
-                               set!(world, (tile));
-                           }
-                           j += 1;
-                       };
-                       i += 1;
-                    };
-                    
             set!(world, (game));
             set!(world,(player));
 
@@ -335,83 +244,4 @@ mod arena {
     }
 
 
-    impl ArenaInternalImpl of super::IArenaInternal<ContractState> {
-        // Function to handle unit type-specific operations
-        fn _handle_tile_plant_add(
-            ref world: IWorldDispatcher,
-            game_id: u32,
-            start_row: u32,
-            start_col: u32,
-            end_row: u32,
-            end_col: u32, 
-            plant_density: u32, 
-            gate_position: felt252
-        ) {
-            let mut row = start_row;
-            while row < end_row + 1 {
-                let mut col = start_col;
-                while col < end_col + 1 {
-                    if row == start_row || row == end_row || col == start_col || col == end_col {
-
-                       
-                        // Border tiles
-                        if !self._handle_is_gate(row, col, start_row, start_col, end_row, end_col, gate_position) {
-                           
-                            let mut tile = get!(world, (game_id, row, col), Tile);
-                            tile.add_plant_to_grid(plant_density);
-                            set!(world, (tile));
-                        }
-                    } else {
-                        // Interior tiles - use Poseidon hash for deterministic "randomness"
-                        let mut state = PoseidonTrait::new();
-                        state.update(game_id.into());
-                        state.update(row.into());
-                        state.update(col.into());
-                        let hash = state.finalize();
-                        
-                        // Convert felt252 to u256 first, then to u128
-                        let hash_u256: u256 = hash.into();
-                        let random_value = (hash_u256.low % 100_u128);  // Using low part of u256
-
-                        
-                        // 20% chance (values 0-19)
-                        if random_value < 20 {
-                            let mut tile = get!(world, (game_id, row, col), Tile);
-                            tile.add_plant_tree_to_grid(2000); // TODO: Make this configurable
-                            set!(world, (tile));
-                        }
-                    }
-                    col += 1;
-                };
-                row += 1;
-            };
-        }
-    
-        fn _handle_is_gate(
-            ref world: IWorldDispatcher,
-            row: u32,
-            col: u32,
-            start_row: u32,
-            start_col: u32,
-            end_row: u32,
-            end_col: u32, 
-            gate_position: felt252
-        ) -> bool {
-            let mid_col = (start_col + end_col) / 2;
-            let mid_row = (start_row + end_row) / 2;
-            
-            if gate_position == 'top' {
-                row == start_row && col == mid_col
-            } else if gate_position == 'bottom' {
-                row == end_row && col == mid_col
-            } else if gate_position == 'left' {
-                col == start_col && row == mid_row
-            } else if gate_position == 'right' {
-                col == end_col && row == mid_row
-            } else {
-                false
-            }
-        }
-
-    }
 }
