@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Section } from "../Pages/Onboarding";
+
 import { FaCheckCircle } from "react-icons/fa";
 import WalletSection from "./Sections/WalletSection";
 // import EthSection from "./Sections/EthSection";

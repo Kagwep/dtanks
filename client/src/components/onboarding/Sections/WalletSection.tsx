@@ -2,7 +2,7 @@ import { Button } from "../../components/buttons/Button";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 import { useElementStore } from "../../../utils/dtanks";
 import React, { useEffect } from "react";
-import { ControllerConnector } from "@cartridge/connector";
+
 
 interface WalletSectionProps {
   onOnboardComplete: () => void;

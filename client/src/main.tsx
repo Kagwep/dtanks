@@ -68,7 +68,7 @@ function App() {
   
   return (
     <React.StrictMode>
-      <StarknetProvider network={network}>
+      <StarknetProvider>
         <TooltipProvider>
           <AudioSettingsProvider>
             {(loginScreen) ? (

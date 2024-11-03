@@ -3,11 +3,9 @@ import { Button } from "../components/buttons/Button";
 import { useElementStore } from "../../utils/dtanks";
 import { useUiSounds, soundSelector } from "../../hooks/useUiSound";
 import Intro from "../onboarding/Intro";
-import Login from "../onboarding/Login";
-import InfoBox from "../onboarding/InfoBox";
 import { FaVolumeUp } from "react-icons/fa";
 import { FaVolumeOff } from "react-icons/fa";
-import { StarknetProvider } from "../../providers/AppProvider";
+
 
 
 export type Section = "connect" | "eth" | "lords" | "arcade";
