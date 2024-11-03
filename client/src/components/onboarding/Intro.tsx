@@ -19,9 +19,6 @@ const Intro: React.FC<IntroProps> = ({onOnboardComplete}) => {
 
   const { play: clickPlay } = useUiSounds(soundSelector.click);
 
-  // Default to katana for development, otherwise use environment network
-  const network = import.meta.env.VITE_PUBLIC_NETWORK === "development" ? "katana" : import.meta.env.VITE_PUBLIC_NETWORK!;
-
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gradient-to-b from-green-900 to-green-950" style={{
@@ -62,15 +59,15 @@ const Intro: React.FC<IntroProps> = ({onOnboardComplete}) => {
                 size={"lg"}
                 onClick={() => {
                   setLoginScreen(true);
-                  setNetwork("katana" as Network);
+                  setNetwork("slot" as Network);
                 }}
                 className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-md shadow-md transition-colors duration-300 mt-auto"
               >
-                Play with Controller
+                Play
               </Button>
             </div>
           </div>
-          <div className="flex flex-col items-center justify-between rounded-lg overflow-hidden bg-green-800 bg-opacity-80 text-green-100 shadow-lg border border-green-600 w-full sm:w-1/2">
+          {/* <div className="flex flex-col items-center justify-between rounded-lg overflow-hidden bg-green-800 bg-opacity-80 text-green-100 shadow-lg border border-green-600 w-full sm:w-1/2">
             <div className="w-full p-4 flex justify-center items-center bg-green-900">
               <img 
                 src="https://res.cloudinary.com/dydj8hnhz/image/upload/v1730413962/j5hj0ewsdlfcmghtze6p.webp" 
@@ -96,7 +93,7 @@ const Intro: React.FC<IntroProps> = ({onOnboardComplete}) => {
                 Play on Katana
               </Button>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

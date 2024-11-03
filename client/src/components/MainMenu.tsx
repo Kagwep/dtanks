@@ -164,7 +164,7 @@ useEffect(() => {
             </div>
           ) : (
             <div className="w-full max-w-4xl bg-gray-800 rounded-lg shadow-2xl overflow-hidden">
-              <div className="p-6 bg-cover bg-center" style={{backgroundImage: "url('https://res.cloudinary.com/dydj8hnhz/image/upload/v1722350662/p1qgfdio6sv1khctclnq.webp')"}}>
+              <div className="p-6 bg-cover bg-center" style={{backgroundImage: "url('https://res.cloudinary.com/dydj8hnhz/image/upload/v1730413962/j5hj0ewsdlfcmghtze6p.webp')"}}>
                 <h2 className="text-3xl font-bold mb-4">Active Games</h2>
                 <Table className="w-full">
                   <TableHeader>

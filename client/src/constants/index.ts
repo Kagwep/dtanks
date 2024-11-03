@@ -3,16 +3,10 @@ import manifest from '../../manifest.json'
 export const TORII_URL = 'https://t.nsrdm.com'
 // export const TORII_URL = 'https://t.nsrdm.com'
 
-export const TORII_RPC_URL = manifest.world.metadata.rpc_url
-export const TORII_RELAY_URL = '/ip4/127.0.0.1/udp/9091/webrtc-direct'
-export const WORLD_ADDRESS = manifest.world.address
-export const TILE_MODEL_TAG = 'flippyflop-Tile'
+export const TORII_RPC_URL = "https://api.cartridge.gg/x/dtankstest/torii"
 
-export const CHUNK_SIZE = 16
-export const CHUNKS = 65536 / (CHUNK_SIZE * CHUNK_SIZE)
-export const CHUNKS_PER_DIMENSION = Math.sqrt(CHUNKS)
-export const WORLD_SIZE = CHUNKS_PER_DIMENSION * CHUNK_SIZE
+export const WORLD_ADDRESS = "0x6019ff874cb7cf5f8ac22d824f37dcece028bfc1e634fd0150e5bae5186e17e"
 
-export const ACTIONS_ADDRESS = manifest.contracts.find((contract) => contract.tag === 'flippyflop-actions')?.address
-export const FLIP_ADDRESS = manifest.contracts.find((contract) => contract.tag === 'flippyflop-Flip')?.address
-export const CLAIMS_ADDRESS = manifest.contracts.find((contract) => contract.tag === 'flippyflop-game')?.address
+
+export const ACTIONS_ADDRESS = "0x6901571cfa73e17d5be1c3a86c12dfbe25210fa461e915354bae223bba37a15"
+export const ARENA_ADDRESS = "0x6799df4857c44d232fefd3baa777acfb715844d5ea7ff2e97ed2bde5ae25ccc"

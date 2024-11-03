@@ -4,7 +4,7 @@ import { createDojoConfig, KATANA_CLASS_HASH, KATANA_ETH_CONTRACT_ADDRESS } from
 import manifest from "../../manifest.json";
 import manifest_sepolia from "../manifests/manifest.json";
 
-export type Network = "mainnet" | "katana" | "sepolia" | "localKatana" | undefined;
+export type Network = "mainnet" | "katana" | "sepolia" | "localKatana" | "slot" | undefined;
 
 export const networkConfig: Record<Network, {
   name: string;
@@ -62,5 +62,22 @@ export const networkConfig: Record<Network, {
       accountClassHash: KATANA_CLASS_HASH,
       feeTokenAddress: KATANA_ETH_CONTRACT_ADDRESS,
     }),
+  },
+  slot: {
+    name: "slot",
+    rpcUrl: "https://api.cartridge.gg/x/dtankstest/katana",
+    toriiUrl: "https://api.cartridge.gg/x/dtankstest/torii",
+    dojoConfig: createDojoConfig({
+      manifest,
+      rpcUrl: "https://api.cartridge.gg/x/dtankstest/katana",
+      toriiUrl: "https://api.cartridge.gg/x/dtankstest/torii",
+      masterAddress: "0x5fe4edea96d9df83f1685d2eaa8a00989594e0f898d8f94f90eda66dbab26b9",
+      masterPrivateKey: "0x505181a7b906ef6bb82bf2b0e580a6ad7f4c4c2d35e2eb15e76daa20f54f302",
+      accountClassHash: KATANA_CLASS_HASH,
+      feeTokenAddress: KATANA_ETH_CONTRACT_ADDRESS,
+    }),
   }
 };
+
+//account_address = "0x5fe4edea96d9df83f1685d2eaa8a00989594e0f898d8f94f90eda66dbab26b9"
+//private_key = "0x505181a7b906ef6bb82bf2b0e580a6ad7f4c4c2d35e2eb15e76daa20f54f302"

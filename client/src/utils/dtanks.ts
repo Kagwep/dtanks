@@ -144,6 +144,7 @@ export type Network =
   | "katana"
   | "sepolia"
   | "localKatana"
+  |  "slot"
   | undefined;
 
   export function stringToUnitType(unitString: string): UnitType {

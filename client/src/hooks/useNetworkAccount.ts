@@ -7,25 +7,26 @@ import { useMemo, useCallback, useEffect, useRef } from "react";
 export default function useNetworkAccount() {
   const network = useElementStore((state) => state.network);
   const { account: starknetAccount, status: starknetStatus, isConnected: starknetIsConnected } = useAccount();
-  const { account: { account: katanaAccount } } = useDojo();
+  //const { account: { account: katanaAccount } } = useDojo();
 
   const prevNetworkRef = useRef(network);
 
   const getAccountInfo = useCallback(() => {
-    if (network === "sepolia" || network === "mainnet") {
+    if (network === "sepolia" || network === "mainnet" || "slot") {
       return {
         account: starknetAccount,
         status: starknetStatus,
         isConnected: starknetIsConnected,
       };
-    } else {
-      return {
-        account: katanaAccount as Account,
-        status: "connected" as const,
-        isConnected: true,
-      };
-    }
-  }, [network, starknetAccount, starknetStatus, starknetIsConnected, katanaAccount]);
+    } 
+    // else {
+    //   return {
+    //     account: katanaAccount as Account,
+    //     status: "connected" as const,
+    //     isConnected: true,
+    //   };
+    // }
+  }, [network, starknetAccount, starknetStatus, starknetIsConnected]);
 
   const accountInfo = useMemo(() => {
     const info = getAccountInfo();

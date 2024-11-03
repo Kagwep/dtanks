@@ -1,18 +1,19 @@
 import ControllerConnector from '@cartridge/connector/controller'
-import { mainnet, sepolia } from '@starknet-react/chains'
+import {  sepolia } from '@starknet-react/chains'
 import { StarknetConfig, starkscan } from '@starknet-react/core'
 import { RpcProvider } from 'starknet'
 
-import { ACTIONS_ADDRESS, FLIP_ADDRESS, TORII_RPC_URL } from '@/constants'
+import { ACTIONS_ADDRESS, ARENA_ADDRESS, TORII_RPC_URL } from '@/constants'
 
 import type { Chain } from '@starknet-react/chains'
 import type { PropsWithChildren } from 'react'
+import { defaultPresets } from '@cartridge/controller'
 
 export function StarknetProvider({ children }: PropsWithChildren) {
   return (
     <StarknetConfig
       autoConnect
-      chains={[mainnet, sepolia]}
+      chains={[ sepolia]}
       connectors={[cartridge]}
       explorer={starkscan}
       provider={provider}
@@ -25,33 +26,89 @@ export function StarknetProvider({ children }: PropsWithChildren) {
 const cartridge = new ControllerConnector({
   policies: [
     {
-      target: ACTIONS_ADDRESS,
-      method: 'flip',
-      description: 'Flip a tile at given x and y coordinates',
+      target: ARENA_ADDRESS,
+      method: 'create',
+      description: 'create new dtank game',
     },
     {
-      target: ACTIONS_ADDRESS,
-      method: 'claim',
-      description: 'Claim $FLIP for your flipped tiles',
+      target: ARENA_ADDRESS,
+      method: 'join',
+      description: 'Join dtank game',
     },
     {
-      target: FLIP_ADDRESS,
+      target: ARENA_ADDRESS,
       method: 'transfer',
-      description: 'Withdraw $FLIP from the game',
+      description: 'transfer game to player two',
+    },
+    {
+      target: ARENA_ADDRESS,
+      method: 'leave',
+      description: 'leave Dtanks Game',
+    },
+    {
+      target: ARENA_ADDRESS,
+      method: 'start',
+      description: 'Start dtanks game',
+    },
+    {
+      target: ARENA_ADDRESS,
+      method: 'delete',
+      description: 'delete Dtanks game',
+    },
+    {
+      target: ARENA_ADDRESS,
+      method: 'kick',
+      description: 'kick player out',
+    },
+    {
+      target: ACTIONS_ADDRESS,
+      method: 'deploy',
+      description: 'deploy dtanks',
+    },
+    {
+      target: ACTIONS_ADDRESS,
+      method: 'move',
+      description: 'Move dtanks',
+    },
+    {
+      target: ACTIONS_ADDRESS,
+      method: 'aim',
+      description: 'Target Opponents Dtank',
+    },
+    {
+      target: ACTIONS_ADDRESS,
+      method: 'fire',
+      description: 'FIre towards dtank',
+    },
+    {
+      target: ACTIONS_ADDRESS,
+      method: 'reveal',
+      description: 'Is Dtank Dummy',
+    },
+    {
+      target: ACTIONS_ADDRESS,
+      method: 'tree',
+      description: 'add tree to battlefield',
+    },
+    {
+      target: ACTIONS_ADDRESS,
+      method: 'shrub',
+      description: 'Add shrubs on battle field',
     },
   ],
   url: 'https://x.cartridge.gg',
-  rpc: TORII_RPC_URL,
-  theme: 'flippyflop',
+  rpc: "https://api.cartridge.gg/x/dtankstest/katana",
+  theme: 'dtanks',
   config: {
     presets: {
-      flippyflop: {
-        id: 'flippyflop',
-        name: 'FlippyFlop',
-        icon: '/whitelabel/flippyflop/icon.png',
-        cover: '/whitelabel/flippyflop/cover.png',
+      ...defaultPresets,  // spread the default presets
+      dtanks: {          // add your custom preset
+        id: 'dtanks',
+        name: 'dtanks',
+        icon: 'http://localhost:5173/dtanks.png',
+        cover: 'http://localhost:5173/cover.png',
         colors: {
-          primary: '#F38332',
+          primary: '#4A5D23',
         },
       },
     },
@@ -59,16 +116,9 @@ const cartridge = new ControllerConnector({
   propagateSessionErrors: true,
 })
 
+
 function provider(chain: Chain) {
-  switch (chain) {
-    case mainnet:
-      return new RpcProvider({
-        nodeUrl: 'https://api.cartridge.gg/x/starknet/mainnet',
-      })
-    case sepolia:
-    default:
-      return new RpcProvider({
-        nodeUrl: 'https://api.cartridge.gg/x/starknet/sepolia',
-      })
-  }
+  return new RpcProvider({
+      nodeUrl: "https://api.cartridge.gg/x/dtankstest/katana",
+  });
 }

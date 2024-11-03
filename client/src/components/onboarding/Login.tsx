@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { Section } from "../Pages/Onboarding";
 import { FaCheckCircle } from "react-icons/fa";
 import WalletSection from "./Sections/WalletSection";
-import EthSection from "./Sections/EthSection";
-import { ScreenPage, useElementStore } from "../../utils/nexus";
-import { ETH_PREFUND_AMOUNT } from "../../lib/constants";
-import { checkCartridgeConnector } from "../../lib/connectors";
-import { useConnect } from "@starknet-react/core";
+// import EthSection from "./Sections/EthSection";
+// import { ScreenPage, useElementStore } from "../../utils/nexus";
+// import { ETH_PREFUND_AMOUNT } from "../../lib/constants";
+// import { checkCartridgeConnector } from "../../lib/connectors";
+// import { useConnect } from "@starknet-react/core";
 
 interface LoginProps {
   onOnboardComplete: () => void;

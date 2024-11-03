@@ -1005,7 +1005,7 @@
     "seed": "contracts",
     "metadata": {
       "profile_name": "dev",
-      "rpc_url": "http://localhost:5050/"
+      "rpc_url": "https://api.cartridge.gg/x/dtankstest/katana"
     },
     "name": "dojo::world::world"
   },
@@ -1020,8 +1020,8 @@
     {
       "kind": "DojoContract",
       "address": "0x6901571cfa73e17d5be1c3a86c12dfbe25210fa461e915354bae223bba37a15",
-      "class_hash": "0x51e3cf1471625737826de23fc879291abde7aa9d04762e9a0b0656cfd2775af",
-      "original_class_hash": "0x51e3cf1471625737826de23fc879291abde7aa9d04762e9a0b0656cfd2775af",
+      "class_hash": "0x52d7e35f46155c091955c3dff7cf3fefa7a9281293e38f995b4761df1fdabeb",
+      "original_class_hash": "0x52d7e35f46155c091955c3dff7cf3fefa7a9281293e38f995b4761df1fdabeb",
       "base_class_hash": "0x22f3e55b61d86c2ac5239fa3b3b8761f26b9a5c0b5f61ddbd5d756ced498b46",
       "abi": [
         {
@@ -1220,6 +1220,46 @@
               ],
               "outputs": [],
               "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "shrub",
+              "inputs": [
+                {
+                  "name": "game_id",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "row",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "col",
+                  "type": "core::integer::u32"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "tree",
+              "inputs": [
+                {
+                  "name": "game_id",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "row",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "col",
+                  "type": "core::integer::u32"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
             }
           ]
         },
@@ -1310,8 +1350,8 @@
     {
       "kind": "DojoContract",
       "address": "0x6799df4857c44d232fefd3baa777acfb715844d5ea7ff2e97ed2bde5ae25ccc",
-      "class_hash": "0x3543aab97fde9582bbef9f58eb797286c83b85d1e330039104dc3db845b5d03",
-      "original_class_hash": "0x3543aab97fde9582bbef9f58eb797286c83b85d1e330039104dc3db845b5d03",
+      "class_hash": "0x5dfa5641183959e3cc45b498dcaeef540e74594070bb3eec2fe85b5e9169d37",
+      "original_class_hash": "0x5dfa5641183959e3cc45b498dcaeef540e74594070bb3eec2fe85b5e9169d37",
       "base_class_hash": "0x22f3e55b61d86c2ac5239fa3b3b8761f26b9a5c0b5f61ddbd5d756ced498b46",
       "abi": [
         {
@@ -2228,10 +2268,15 @@
           "name": "reveal",
           "type": "bool",
           "key": false
+        },
+        {
+          "name": "placements",
+          "type": "u32",
+          "key": false
         }
       ],
-      "class_hash": "0xdfc00eb19b17e8a1ff71d2f0fab32047ccc959d4558417c9240db92b8dff8c",
-      "original_class_hash": "0xdfc00eb19b17e8a1ff71d2f0fab32047ccc959d4558417c9240db92b8dff8c",
+      "class_hash": "0x70f029e388626a8b775f9c8d03fbfb0326476da5dd1e1ee6a4079afba288b03",
+      "original_class_hash": "0x70f029e388626a8b775f9c8d03fbfb0326476da5dd1e1ee6a4079afba288b03",
       "abi": [
         {
           "type": "impl",
@@ -2625,6 +2670,10 @@
             {
               "name": "reveal",
               "type": "core::bool"
+            },
+            {
+              "name": "placements",
+              "type": "core::integer::u32"
             }
           ]
         },
