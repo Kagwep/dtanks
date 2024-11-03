@@ -1,5 +1,5 @@
 import manifest from "./manifest.json";
-import manifest_sepolia from "./manifests/manifest.json"
+import manifest_sepolia from "./manifest.json"
 import { KATANA_ETH_CONTRACT_ADDRESS, createDojoConfig, KATANA_CLASS_HASH } from '@dojoengine/core';
 
 export const dojoConfig = createDojoConfig({

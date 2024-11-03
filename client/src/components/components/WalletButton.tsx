@@ -1,7 +1,7 @@
 import { shortAddress } from '../../utils/sanitizer';
 import { Wallet } from 'lucide-react';
 import { Button } from '../UI/button';
-import { useDojo } from '../dojo/useDojo';
+// import { useDojo } from '../dojo/useDojo';
 import { useElementStore } from '../../utils/dtanks';
 import { useNetworkAccount } from '../../contexts/WalletContex';
 

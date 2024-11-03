@@ -93,11 +93,11 @@ const Lobby: React.FC = () => {
       setStartLoading(true);
       console.log("loading..........",game_id, round_limit)
       const response = await arena.start(account, game_id, round_limit);
-      console.log(response.execution_status);
-      toast({
-        variant: 'default',
-        description: <code className="text-white text-xs">{response.execution_status}</code>,
-      });
+      // console.log(response.execution_status);
+      // toast({
+      //   variant: 'default',
+      //   description: <code className="text-white text-xs">{response.execution_status}</code>,
+      // });
     } catch (error: any) {
       toast({
         variant: 'destructive',

@@ -42,21 +42,21 @@ export async function setupWorld(provider: DojoProvider) {
    
 
     // Add any additional checks or logic here based on the receipt
-    if (receipt.revert_reason === 'REJECTED') {
-      console.log('Transaction Rejected');
-      throw new Error('[Tx REJECTED] ');
-    }
+    //   console.log('Transaction Rejected');
+    //   throw new Error('[Tx REJECTED] ');
+    // }   if (receipt.revert_reason === 'REJECTED') {
+ 
 
-    if ('execution_status' in receipt) {
-      // The receipt is of a type that includes execution_status
-      if (receipt.execution_status === 'REVERTED') {
-        const errorMessage = tryBetterErrorMsg(
-          (receipt as GetTransactionReceiptResponse).revert_reason || 'Transaction Reverted'
-        );
-        console.log('ERROR KATANA', errorMessage);
-        throw new Error('[Tx REVERTED] ' + errorMessage);
-      }
-    }
+    // if ('execution_status' in receipt) {
+    //   // The receipt is of a type that includes execution_status
+    //   if (receipt.execution_status === 'REVERTED') {
+    //     // const errorMessage = tryBetterErrorMsg(
+    //     //   (receipt as GetTransactionReceiptResponse).revert_reason || 'Transaction Reverted'
+    //     // );
+    //     console.log('ERROR KATANA', errorMessage);
+    //     throw new Error('[Tx REVERTED] ' + errorMessage);
+    //   }
+    // }
 
     return receipt;
   };

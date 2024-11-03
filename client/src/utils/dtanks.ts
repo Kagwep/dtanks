@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import GameState from './gamestate';
 import { AbilityType, AnimationMapping, BannerLevel, Battle, BattlefieldName, EncodedVector3, Region, UnitAbilities, UnitType } from '../types';
-import { LogType } from '../hooks/useLogs';
+
 import { Vector3 } from '@babylonjs/core';
 import { removeLeadingZeros } from './sanitizer';
 import { bigintToU256 } from "../lib/lib_utils/starknet";
@@ -58,8 +58,7 @@ interface State {
   setLastBattleResult: (battle: Battle | null) => void;
   tilesConqueredThisTurn: number[];
   setTilesConqueredThisTurn: (tile: number[]) => void;
-  last_log: LogType | null;
-  set_last_log: (last_log: LogType | null) => void;
+
   round_limit: number;
   setRoundLimit: (limit: number) => void;
   username: string;
@@ -81,8 +80,7 @@ interface State {
 
 export const useElementStore = create<State>((set) => ({
 
-  last_log: null,
-  set_last_log: (last_log: LogType | null) => set(() => ({ last_log })),
+
   game_id: -1,
   set_game_id: (game_id: number) => {
     console.log('Setting game_id to:', game_id);
