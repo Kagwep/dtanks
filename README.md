@@ -1,6 +1,6 @@
 # DTanks - Deceptive Tank Warfare
 
-![DTanks Logo Placeholder]
+![DTanks Logo Placeholder](https://res.cloudinary.com/dydj8hnhz/image/upload/v1730703872/tavw1uik9r9uqhesyy1y.jpg)
 
 DTanks is a  tank combat game. Dtanks has real and dummy tanks. victory depends not just on firepower, but on your ability to deceive and outmaneuver your opponents.
 
