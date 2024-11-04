@@ -15,16 +15,18 @@ export const NetworkAccountProvider = ({ children }) => {
         isConnected: starknetIsConnected,
     } = useAccount();
 
-    // const {
-    //     account: { account: katanaAccount },
-    // } = useDojo();
+    const {
+        account: { account: katanaAccount },
+    } = useDojo();
+
+    console.log(katanaAccount,network)
 
     const accountData = useMemo(() => ({
-        account: network === "slot" || "sepolia" || network === "mainnet" ? starknetAccount : null,
+        account: network === "slot" ||network === "sepolia" || network === "mainnet" ? starknetAccount : katanaAccount,
         address: starknetAccount?.address,
-        status: network ==="slot" || "sepolia" || network === "mainnet" ? starknetStatus : "connected",
-        isConnected: network === "slot" ||"sepolia" || network === "mainnet" ? starknetIsConnected : true,
-    }), [network, starknetAccount, starknetStatus, starknetIsConnected]);
+        status: network ==="slot" || network === "sepolia" || network === "mainnet" ? starknetStatus : "connected",
+        isConnected: network === "slot" || network === "sepolia" || network === "mainnet" ? starknetIsConnected : true,
+    }), [network, starknetAccount, starknetStatus, starknetIsConnected,katanaAccount]);
 
     return (
         <NetworkAccountContext.Provider value={accountData}>

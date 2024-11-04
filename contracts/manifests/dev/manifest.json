@@ -1005,7 +1005,7 @@
     "seed": "contracts",
     "metadata": {
       "profile_name": "dev",
-      "rpc_url": "https://api.cartridge.gg/x/dtankstest/katana"
+      "rpc_url": "http://localhost:5050/"
     },
     "name": "dojo::world::world"
   },

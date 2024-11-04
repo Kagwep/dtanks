@@ -40,16 +40,16 @@ export const useGame = () => {
       }
     };
 
-    // useEffect(() => {
-    //   if (game_id === undefined || game_id === null) return;
+    useEffect(() => {
+      if (game_id === undefined || game_id === null) return;
 
-    //   console.log('Starting sync for game:', game_id);
+      console.log('Starting sync for game:', game_id);
       
-    //   syncEntities();
-    //   const interval = setInterval(syncEntities, 1000);
+      syncEntities();
+      const interval = setInterval(syncEntities, 1000);
       
-    //   return () => clearInterval(interval);
-    // }, []); // Empty since game_id is static
+      return () => clearInterval(interval);
+    }, []); // Empty since game_id is static
     // Following the same pattern as useGetPlayersForGame
     const gameEntities = useEntityQuery([
       Has(Game), 

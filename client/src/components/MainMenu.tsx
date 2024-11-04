@@ -36,7 +36,7 @@ const MainMenu: React.FC = () => {
   const game = useGame();
 
 
-  console.log(account,game)
+  console.log(account,game,address)
 
   const playerEntities = useEntityQuery([HasValue(Player, { address: BigInt(account.address) })]);
   const playerEntity = useMemo(() => playerEntities.length > 0 ? playerEntities[0] : undefined, [playerEntities]);

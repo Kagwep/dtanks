@@ -1,13 +1,13 @@
-# DTanks - Deceptive Tank Warfare on Starknet
+# DTanks - Deceptive Tank Warfare
 
 ![DTanks Logo Placeholder]
 
-DTanks is a strategic tank combat game built on Starknet where deception meets warfare. Command your fleet of real and dummy tanks in a battle of wits and strategy, where victory depends not just on firepower, but on your ability to deceive and outmaneuver your opponents.
+DTanks is a  tank combat game. Dtanks has real and dummy tanks. victory depends not just on firepower, but on your ability to deceive and outmaneuver your opponents.
 
 ## 🎮 Game Overview
 
 ### Core Concept
-In DTanks, victory requires reaching 1,500 points while managing a sophisticated fleet of tanks:
+In DTanks, victory requires reaching 1,500 points while managing 12 fleet of tanks:
 - **Real Tanks**: 6 combat-capable units
 - **Dummy Tanks**: 6 deceptive units for strategic misdirection
 
@@ -16,190 +16,94 @@ In DTanks, victory requires reaching 1,500 points while managing a sophisticated
 - Points are earned through successful combat and strategic revelations
 
 ### 🗺️ Battlefield Elements
-- Procedurally generated combat zone featuring:
+- Procedurally create:
   - Strategic plantations affecting visibility and movement
   - Tactical tree cover for ambush opportunities
-  - Strategic gate positions for controlling movement flows
-- Every match features a unique battlefield layout
+  
 
-## 🎯 Gameplay Mechanics
+## Game Setup
 
-### Unit Operations
+### Battle Grid
+- Grid Size: 30x28 (840 cells)
+- Players: 2
+- Initial Setup Phase: 12 turns per player
+- Regular Phase: 3 turns per round
 
-#### 1. Tank Deployment
-```cairo
-fn deploy(
-    ref world: IWorldDispatcher,
-    game_id: u32, 
-    row: u32, 
-    col: u32,
-    is_dummy: bool, 
-    salt: felt252
-)
-```
-- Strategic placement of both real and dummy tanks
-- Concealment system using cryptographic salts
-- Position validation against battlefield constraints
+### Tank Forces
+Each player commands:
+- 6 Real Tanks: Actual combat units
+- 6 Dummy Tanks: Decoy units to deceive opponents
+- Total Force: 12 tanks per player
 
-#### 2. Movement System
-```cairo
-fn move(
-    ref world: IWorldDispatcher,
-    game_id: u32,
-    unit_id: u32, 
-    row: u32, 
-    col: u32
-)
-```
-- Grid-based movement with terrain consideration
-- Path validation through plantations and obstacles
-- Strategic positioning around gates and cover
+### Turn System
 
-#### 3. Combat Operations
-```cairo
-// Target acquisition
-fn aim(
-    ref world: IWorldDispatcher,
-    game_id: u32,
-    unit_id: u32,
-    target_id: u32
-)
+#### Initial Phase (12 Turns)
+Players can use their 12 initial turns for any combination of:
+- Deploying Tanks (Real or Dummy)
+- Moving Existing Tanks
+- Placing Obstacles
 
-// Execute attack
-fn fire(
-    ref world: IWorldDispatcher,
-    game_id: u32,
-    unit_id: u32,
-    is_dummy: bool, 
-    salt: felt252
-)
+strategic choices:
+- Focus on rapid tank deployment
+- Create defensive terrain
+- Balance between deployment and positioning
+- Set up deceptive patterns with dummy tanks
 
-// Strategic revelation
-fn reveal(
-    ref world: IWorldDispatcher,
-    game_id: u32,
-    unit_id: u32,
-    is_dummy: bool, 
-    salt: felt252
-)
-```
+#### Regular Phase
+After the initial 12 turns are exhausted:
+- Players receive 3 turns per round
+- These turns can be used for movement,  combat and obstacle placement
 
-### 🏟️ Arena System
 
-#### Game Creation
-```cairo
-fn create(
-    ref world: IWorldDispatcher,
-    player_name: felt252,
-    price: u256,
-    penalty: u64
-) -> u32
-```
-- Set entry stakes and penalty conditions
-- Configure match parameters
-- Initialize battlefield generation
+## Strategic Elements
 
-#### Battlefield Generation
-```cairo
-fn handle_tile_plant_add(
-    ref world: IWorldDispatcher,
-    game_id: u32,
-    start_row: u32,
-    start_col: u32,
-    end_row: u32,
-    end_col: u32, 
-    plant_density: u32, 
-    gate_position: felt252
-)
-```
-- Procedural terrain generation
-- Strategic placement of obstacles and cover
-- Balanced plant density for fair gameplay
+### Tank Deployment
+- Strategic choice between real and dummy tanks
+- Position real tanks for maximum effectiveness
+- Use dummy tanks to:
+  - Mislead opponent
+  - Protect real tanks
+  - Create false attack vectors
 
-## 💡 Strategic Elements
+### Terrain Manipulation
+players can:
 
-### Deception Tactics
-- Use dummy tanks to create false frontlines
-- Strategic revelation timing for maximum impact
-- Psychological warfare through bluffing
+- Block line of sight by placing shrubs or trees
 
-### Combat Mechanics
-```cairo
-fn get_damage(
-    ref world: IWorldDispatcher,
-    game_id: u32,
-    source_row: u32,
-    source_col: u32,
-    target_row: u32,
-    target_col: u32,
-) -> u32
-```
-- Distance-based damage calculations
-- Terrain impact on attack effectiveness
-- Strategic positioning bonuses
+### Resource Management
+Players must balance:
+1. Early tank deployment vs terrain setup
+2. Real vs dummy tank positioning
+3. Offensive vs defensive setup
+4. Time spent on each action type
 
-## 🔧 Technical Architecture
+## Strategic Considerations
 
-### Smart Contract Structure
-Built on Starknet using Dojo framework with two primary interfaces:
+### Early Game Decisions
+- Rush with real tanks for early advantage
+- Create defensive positions with obstacles
+- Mix dummy and real tanks for deception
+- Save turns for repositioning
 
-#### 1. IActions Interface
-```cairo
-trait IActions {
-    fn deploy(...)
-    fn move(...)
-    fn aim(...)
-    fn fire(...)
-    fn reveal(...)
-}
-```
+### Tactical Depth
+- Use shrubs and trees to protect real tanks by blocking line of sight
+- Position dummy tanks to draw fire
 
-#### 2. IArena Interface
-```cairo
-trait IArena {
-    fn create(...)
-    fn join(...)
-    fn transfer(...)
-    fn leave(...)
-    fn start(...)
-    fn delete(...)
-    fn kick(...)
-}
-```
+### Long-term Strategy
+- Create sustainable defensive positions
+- Maintain flexibility for late-game moves
+- Balance between offense and defense
+- Keep opponent guessing about tank authenticity
 
-### Security Features
-- Cryptographic salt system for tank concealment
-- Action validation framework
-- Anti-exploitation mechanisms
+## Tips for New Players
+1. Don't use all turns immediately
+2. Mix your tank types to maintain uncertainty
+3. se shrubs and trees to protect real tanks by blocking line of sight
+4. Consider leaving some turns for repositioning
+5. Watch opponent patterns to identify real tanks
+6. Use dummy tanks to protect your real ones
 
-## 🚀 Getting Started
 
-### Prerequisites
-- Starknet wallet
-- Basic understanding of crypto gaming
-
-### Installation
-1. Connect your wallet
-2. Join or create a game:
-```cairo
-fn join(
-    ref world: IWorldDispatcher,
-    game_id: u32, 
-    player_name: felt252
-)
-```
-
-### Quick Start Guide
-1. Create or join a game
-2. Deploy your tanks strategically
-3. Use movement and combat actions
-4. Manage your real and dummy tanks effectively
-
-## 🤝 Contributing
-We welcome contributions to DTanks! Check our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-## 📜 License
-[Add License Information]
 
 ## 🔗 Links
 - [Game Documentation]

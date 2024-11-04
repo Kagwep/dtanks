@@ -1,5 +1,5 @@
 [package]
-cairo-version = "=2.7.0"
+cairo-version = "=2.6.3"
 name = "contracts"
 version = "0.1.0"
 
@@ -12,42 +12,33 @@ spawn = "./scripts/spawn.sh"
 move = "./scripts/move.sh"
 
 [dependencies]
-dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.0.0-alpha.11" }
+dojo = { git = "https://github.com/dojoengine/dojo", tag = "v0.7.4" }
 
 [[target.dojo]]
 
 [tool.dojo]
 initializer_class_hash = "0xbeef"
 
-[tool.dojo.env]
-rpc_url = "https://api.cartridge.gg/x/dtankstest/katana" #
-# Default account for katana with seed = 0
-account_address = "0x5fe4edea96d9df83f1685d2eaa8a00989594e0f898d8f94f90eda66dbab26b9"
-private_key = "0x505181a7b906ef6bb82bf2b0e580a6ad7f4c4c2d35e2eb15e76daa20f54f302"
-world_address = "0x6019ff874cb7cf5f8ac22d824f37dcece028bfc1e634fd0150e5bae5186e17e"  # Uncomment and update this line with your world address.
-
 #[tool.dojo.env]
-#rpc_url = "http://localhost:5050" #
+#rpc_url = "https://api.cartridge.gg/x/dtankstest/katana" #
 # Default account for katana with seed = 0
-#account_address = "0xb3ff441a68610b30fd5e2abbf3a1548eb6ba6f3559f2862bf2dc757e5828ca"
-#private_key = "0x2bbf4f9fd0bbb2e60b0316c1fe0b76cf7a4d0198bd493ced9b8df2a3a24d68a"
+#account_address = "0x5fe4edea96d9df83f1685d2eaa8a00989594e0f898d8f94f90eda66dbab26b9"
+#private_key = "0x505181a7b906ef6bb82bf2b0e580a6ad7f4c4c2d35e2eb15e76daa20f54f302"
 #world_address = "0x6019ff874cb7cf5f8ac22d824f37dcece028bfc1e634fd0150e5bae5186e17e"  # Uncomment and update this line with your world address.
 
-# -----------------------
-# slot (dtanks)
-# 
-[profile.slot.tool.dojo.env]
-rpc_url = "https://api.cartridge.gg/x/nexus-one/katana" #https://api.cartridge.gg/x/nexus-one/katana
+[tool.dojo.env]
+rpc_url = "http://localhost:5050" #
+#Default account for katana with seed = 0
 account_address = "0xb3ff441a68610b30fd5e2abbf3a1548eb6ba6f3559f2862bf2dc757e5828ca"
 private_key = "0x2bbf4f9fd0bbb2e60b0316c1fe0b76cf7a4d0198bd493ced9b8df2a3a24d68a"
 world_address = "0x6019ff874cb7cf5f8ac22d824f37dcece028bfc1e634fd0150e5bae5186e17e"  # Uncomment and update this line with your world address.
 
 
 [profile.sepolia.tool.dojo.env]
-rpc_url = "https://starknet-sepolia.public.blastapi.io"
-world_address = "0x21cc3925e3837c1c174aaa524d0493337ee0269d252b7debe5ea41879452071"
-account_address = "0x019c74893C2e763C379f440F5787bD1078d5a84F9D8eb8C365b0008adB89a8d8" # env: DOJO_ACCOUNT_ADDRESS
-private_key = "0x073e13220f7edce5d75b230163356c2249bc79a97d288c86d112d05011df9adc"     # env: DOJO_PRIVATE_KEY
+rpc_url = "https://api.cartridge.gg/x/starknet/sepolia"
+account_address = " 0x0215AF1A59d8ba6D49e4cc965bE8BfCd6Cbd86E0AbE758B32a82BDB353B749dE"
+private_key = " 0x038bfbdcc9e31a5fceadba808398316e543ded6ea2ffc044edeed04429f128b6"
+#world_address = "0x21cc3925e3837c1c174aaa524d0493337ee0269d252b7debe5ea41879452071"
 
 [tool.dojo.world]
 name = "Dojo starter"
